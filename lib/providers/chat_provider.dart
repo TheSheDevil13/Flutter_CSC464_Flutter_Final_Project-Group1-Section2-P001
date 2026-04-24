@@ -3,7 +3,7 @@ import '../models/message_model.dart';
 import '../models/chat_session_model.dart';
 import '../models/language_data.dart';
 import '../services/firestore_service.dart';
-import '../services/gemini_service.dart'; 
+import '../services/groq_service.dart'; 
 
 // Tracks the current status of the AI response
 enum AiState { idle, loading, error }
@@ -110,8 +110,8 @@ class ChatProvider extends ChangeNotifier {
       );
       _addToHistory('user', trimmed);
 
-      // Call the Gemini API to get a response
-      final aiText = await GeminiService.sendMessage(
+      // Call the Groq API to get a response
+      final aiText = await GroqService.sendMessage(
         language:            _selectedLanguage.name,
         conversationHistory: List.from(_history),
         userMessage:         trimmed,
@@ -172,7 +172,7 @@ class ChatProvider extends ChangeNotifier {
     notifyListeners();
 
     try {
-      final greeting = await GeminiService.sendMessage(
+      final greeting = await GroqService.sendMessage(
         language:            _selectedLanguage.name,
         conversationHistory: [],
         userMessage:
@@ -209,7 +209,7 @@ class ChatProvider extends ChangeNotifier {
   void _addToHistory(String role, String text) {
     _history.add({
       'role':  role,
-      'parts': [{'text': text}],
+      'content': text,
     });
     
     // Remove oldest messages if we exceed the limit

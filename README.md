@@ -15,13 +15,13 @@ You can currently practice and learn 12 different languages with LinguaAI:
 - 🇨🇳 **Mandarin** (普通话)
 - 🇸🇦 **Arabic** (العربية)
 - 🇮🇹 **Italian** (Italiano)
-- 🇬🇧 **English** (English)
+- 🇺🇸 **English** (English)
 - 🇮🇳 **Hindi** (हिन्दी)
 - 🇧🇩 **Bengali** (বাংলা)
 - 🇷🇺 **Russian** (Русский)
 
 ## How It Works
-1. **AI Integration**: The core conversational logic is powered by the **Gemini API** (`gemini-2.5-flash-lite` model). We use a tailored system prompt to instruct the AI to act as a supportive language tutor, providing gentle corrections and vocabulary translations in real-time.
+1. **AI Integration**: The core conversational logic is powered by the **Groq API** (`llama-3.3-70b-versatile` model). We use a tailored system prompt to instruct the AI to act as a supportive language tutor, providing gentle corrections and vocabulary translations in real-time.
 2. **State Management**: The app uses the **Provider** package to manage the chat state, ensuring the UI updates smoothly as messages are sent and received.
 3. **Data Storage**: User chat history is preserved across sessions using **Firebase Firestore**. This allows users to review past conversations and continue their learning journey where they left off.
-4. **Environment Variables**: For security, sensitive keys like the Gemini API key are stored locally in an ignored `.env` file (managed via `flutter_dotenv`) and are not committed to the repository.
+4. **Environment Variables**: For security, sensitive keys like the Groq API key are stored locally in an ignored `.env` file (managed via `flutter_dotenv`) and are not committed to the repository.
