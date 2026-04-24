@@ -1,45 +1,12 @@
-# Flutter Final Project - CSC464
+# LinguaAI
 
-Welcome to our group project! This is a Flutter application initialization for Group 1, Section 2.
+LinguaAI is an AI Language Learning App developed for our Flutter Final Project (Group 1, Section 2). 
 
-## Collaboration Guide
+## What This Project Does
+LinguaAI serves as a smart language tutor that helps learners practice and improve their language skills through natural, interactive conversation. Instead of rigid lessons, users can chat freely with the AI, which acts as a fluent speaker of the target language. The app provides grammar correction, vocabulary tips, and cultural insights dynamically during the conversation.
 
-To get started with this project, follow these steps:
-
-### 1. Prerequisite
-Ensure you have Flutter installed on your machine. You can check this by running:
-```bash
-flutter --version
-```
-
-### 2. Clone the Repository
-If you haven't already, clone the repository to your local machine:
-```bash
-git clone https://github.com/TheSheDevil13/Flutter_CSC464_Flutter_Final_Project-Group1-Section2-P001.git
-```
-
-### 3. Setup Project
-Navigate to the project directory and get the dependencies:
-```bash
-cd Flutter_CSC464_Flutter_Final_Project-Group1-Section2-P001
-flutter pub get
-```
-
-### 4. Running the App
-To run the app on your emulator or connected device:
-```bash
-flutter run
-```
-
-## Internal Project Details
-- **Project Name**: `flutter_final_project`
-- **Main Entry Point**: `lib/main.dart`
-
-## Contributing
-1. Create a new branch for your feature: `git checkout -b feature/your-feature-name`
-2. Commit your changes: `git commit -m 'Add some feature'`
-3. Push to the branch: `git push origin feature/your-feature-name`
-4. Create a Pull Request on GitHub.
-
----
-*Group 1 - Section 2*
+## How It Works
+1. **AI Integration**: The core conversational logic is powered by the **Gemini API** (`gemini-2.5-flash` model). We use a tailored system prompt to instruct the AI to act as a supportive language tutor, providing gentle corrections and vocabulary translations in real-time.
+2. **State Management**: The app uses the **Provider** package to manage the chat state, ensuring the UI updates smoothly as messages are sent and received.
+3. **Data Storage**: User chat history is preserved across sessions using **Firebase Firestore**. This allows users to review past conversations and continue their learning journey where they left off.
+4. **Environment Variables**: For security, sensitive keys like the Gemini API key are stored locally in an ignored `.env` file (managed via `flutter_dotenv`) and are not committed to the repository.

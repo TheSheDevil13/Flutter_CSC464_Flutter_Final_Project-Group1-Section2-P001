@@ -14,7 +14,7 @@ class GeminiService {
   static String get _apiKey => dotenv.env['GEMINI_API_KEY'] ?? '';
   // ══════════════════════════════════════════════════════════════════════════
 
-  static const String _modelName = 'gemini-1.5-flash';
+  static const String _modelName = 'gemini-2.5-flash';
 
   static Future<String> sendMessage({
     required String language,
