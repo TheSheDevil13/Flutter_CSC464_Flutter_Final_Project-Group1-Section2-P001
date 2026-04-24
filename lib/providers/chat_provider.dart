@@ -1,29 +1,22 @@
-// ─────────────────────────────────────────────────────────────────────────────
-// FILE: lib/providers/chat_provider.dart
-// Central ChangeNotifier. Single source of truth for all app state.
-// ─────────────────────────────────────────────────────────────────────────────
 import 'package:flutter/foundation.dart';
 import '../models/message_model.dart';
 import '../models/chat_session_model.dart';
 import '../models/language_data.dart';
 import '../services/firestore_service.dart';
-
-// ── UPDATED SERVICE IMPORT ───────────────────────────────────────────────────
 import '../services/gemini_service.dart'; 
-// ─────────────────────────────────────────────────────────────────────────────
 
-/// Tracks the AI response lifecycle state.
+// Tracks the current status of the AI response
 enum AiState { idle, loading, error }
 
 class ChatProvider extends ChangeNotifier {
   ChatProvider() {
-    // Set default language to first in the list
+    // Default to the first available language
     _selectedLanguage = kAvailableLanguages.first;
   }
 
   final _db = FirestoreService.instance;
 
-  // ── State fields ──────────────────────────────────────────────────────────
+  // Application state variables
   late LanguageData     _selectedLanguage;
   String?               _activeChatId;
   List<MessageModel>    _messages      = [];
@@ -32,13 +25,11 @@ class ChatProvider extends ChangeNotifier {
   String                _errorMessage  = '';
   bool                  _sessionsLoaded = false;
 
-  // Conversation history sent to AI on each request
-  // Note: We keep the Gemini-style 'parts' structure here; 
-  // GeminiService handles the conversion to Content objects internally.
+  // Keep a local history to send to the Gemini API
   final List<Map<String, dynamic>> _history = [];
-  static const int _maxHistory = 20; // max message pairs kept
+  static const int _maxHistory = 20;
 
-  // ── Public getters ─────────────────────────────────────────────────────────
+  // Getters for the UI
   LanguageData          get selectedLanguage  => _selectedLanguage;
   String?               get activeChatId      => _activeChatId;
   List<MessageModel>    get messages          => List.unmodifiable(_messages);
@@ -50,39 +41,36 @@ class ChatProvider extends ChangeNotifier {
   bool                  get hasActiveChat     => _activeChatId != null;
   bool                  get sessionsLoaded    => _sessionsLoaded;
 
-  // ── Language selection ─────────────────────────────────────────────────────
-
+  // Update the selected language
   void selectLanguage(LanguageData lang) {
     _selectedLanguage = lang;
     notifyListeners();
   }
 
-  // ── Start a brand-new chat session ────────────────────────────────────────
-
+  // Create a new chat session
   Future<bool> startNewChat() async {
     _resetChatState();
     notifyListeners();
 
     try {
-      // 1. Create session document in Firestore
+      // Create a document in Firestore for the new chat
       _activeChatId = await _db.createChatSession(
         language:     _selectedLanguage.name,
         languageFlag: _selectedLanguage.flag,
       );
 
-      // 2. Fetch and display the AI greeting from Gemini
+      // Get the initial greeting from the AI
       await _fetchAiGreeting();
 
       notifyListeners();
-      return true; // success — caller can navigate to /chat
+      return true;
     } catch (e) {
       _setError('Failed to start chat: ${e.toString().replaceAll("Exception: ", "")}');
       return false;
     }
   }
 
-  // ── Load an existing session from history ──────────────────────────────────
-
+  // Load a previous chat session from Firestore
   Future<bool> loadSession(ChatSessionModel session) async {
     _resetChatState();
     _activeChatId      = session.id;
@@ -100,14 +88,13 @@ class ChatProvider extends ChangeNotifier {
     }
   }
 
-  // ── Send a message ─────────────────────────────────────────────────────────
-
+  // Handle sending a message to the AI
   Future<void> sendMessage(String text) async {
     final trimmed = text.trim();
     if (trimmed.isEmpty || _activeChatId == null) return;
     if (_aiState == AiState.loading) return;
 
-    // ① Optimistic UI: show user message immediately
+    // Show the user's message in the UI immediately
     final userMsg = MessageModel.local(sender: 'user', message: trimmed);
     _messages.add(userMsg);
     _aiState      = AiState.loading;
@@ -115,31 +102,27 @@ class ChatProvider extends ChangeNotifier {
     notifyListeners();
 
     try {
-      // ② Save user message to Firestore
+      // Save the user's message to Firestore and local history
       await _db.saveMessage(
         chatId:  _activeChatId!,
         sender:  'user',
         message: trimmed,
       );
-
-      // ③ Add to local history for context
       _addToHistory('user', trimmed);
 
-      // ④ CALL GEMINI SERVICE
+      // Call the Gemini API to get a response
       final aiText = await GeminiService.sendMessage(
         language:            _selectedLanguage.name,
         conversationHistory: List.from(_history),
         userMessage:         trimmed,
       );
 
-      // ⑤ Save AI response to Firestore
+      // Save the AI's response to Firestore and local history
       await _db.saveMessage(
         chatId:  _activeChatId!,
         sender:  'ai',
         message: aiText,
       );
-
-      // ⑥ Show AI response in UI
       _messages.add(MessageModel.local(sender: 'ai', message: aiText));
       _addToHistory('model', aiText);
 
@@ -150,8 +133,7 @@ class ChatProvider extends ChangeNotifier {
     }
   }
 
-  // ── Session history management ─────────────────────────────────────────────
-
+  // Fetch all past chat sessions
   Future<void> loadAllSessions() async {
     try {
       _sessions = await _db.fetchAllSessions();
@@ -162,18 +144,20 @@ class ChatProvider extends ChangeNotifier {
     }
   }
 
+  // Delete a specific chat session
   Future<void> deleteSession(String chatId) async {
     try {
       await _db.deleteChatSession(chatId);
       _sessions.removeWhere((s) => s.id == chatId);
+      
+      // If we deleted the active chat, reset the state
       if (_activeChatId == chatId) _resetChatState();
+      
       notifyListeners();
     } catch (e) {
       _setError('Failed to delete: ${e.toString().replaceAll("Exception: ", "")}');
     }
   }
-
-  // ── Error management ───────────────────────────────────────────────────────
 
   void clearError() {
     if (_aiState == AiState.error) {
@@ -182,14 +166,12 @@ class ChatProvider extends ChangeNotifier {
     }
   }
 
-  // ── Private helpers ────────────────────────────────────────────────────────
-
+  // Helper to fetch the initial AI greeting
   Future<void> _fetchAiGreeting() async {
     _aiState = AiState.loading;
     notifyListeners();
 
     try {
-      // ── CALL GEMINI SERVICE FOR GREETING ─────────────────────────────────────
       final greeting = await GeminiService.sendMessage(
         language:            _selectedLanguage.name,
         conversationHistory: [],
@@ -199,6 +181,7 @@ class ChatProvider extends ChangeNotifier {
             'introduce yourself briefly, and ask what I would like to focus on today.',
       );
 
+      // Save and show the greeting
       await _db.saveMessage(
         chatId:  _activeChatId!,
         sender:  'ai',
@@ -207,7 +190,7 @@ class ChatProvider extends ChangeNotifier {
       _messages.add(MessageModel.local(sender: 'ai', message: greeting));
       _addToHistory('model', greeting);
     } catch (_) {
-      // Fallback greeting if the API fails
+      // Use a fallback greeting if the API fails
       const fallback =
           'Hello! 👋 Welcome to your language lesson! I\'m your AI tutor and I\'m excited to help you learn.\n\n'
           'What would you like to focus on today?\n'
@@ -222,17 +205,20 @@ class ChatProvider extends ChangeNotifier {
     _aiState = AiState.idle;
   }
 
+  // Add a message to the local history array
   void _addToHistory(String role, String text) {
     _history.add({
       'role':  role,
       'parts': [{'text': text}],
     });
-    // Keep history bounded
+    
+    // Remove oldest messages if we exceed the limit
     if (_history.length > _maxHistory) {
       _history.removeRange(0, _history.length - _maxHistory);
     }
   }
 
+  // Rebuild local history when loading a past session
   void _rebuildHistory(List<MessageModel> messages) {
     _history.clear();
     for (final m in messages) {
@@ -240,6 +226,7 @@ class ChatProvider extends ChangeNotifier {
     }
   }
 
+  // Reset all state to defaults
   void _resetChatState() {
     _activeChatId = null;
     _messages.clear();

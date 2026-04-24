@@ -1,19 +1,13 @@
-// ─────────────────────────────────────────────────────────────────────────────
-// FILE: lib/services/gemini_service.dart
-// Handles all communication with the Gemini API.
-// ─────────────────────────────────────────────────────────────────────────────
 import 'package:google_generative_ai/google_generative_ai.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 class GeminiService {
   GeminiService._(); // prevent instantiation
 
-  // ══════════════════════════════════════════════════════════════════════════
-  // YOUR GEMINI API KEY GOES HERE 👇
-  // ══════════════════════════════════════════════════════════════════════════
+  // Get the API key from the .env file
   static String get _apiKey => dotenv.env['GEMINI_API_KEY'] ?? '';
-  // ══════════════════════════════════════════════════════════════════════════
 
+  // Use the 2.5 flash model for fast responses
   static const String _modelName = 'gemini-2.5-flash';
 
   static Future<String> sendMessage({
@@ -22,17 +16,18 @@ class GeminiService {
     required String userMessage,
   }) async {
     if (_apiKey.isEmpty || _apiKey == 'YOUR_GEMINI_API_KEY_HERE') {
-      throw const GeminiException('Please add your Gemini API Key in lib/services/gemini_service.dart');
+      throw const GeminiException('Please add your Gemini API Key to the .env file');
     }
 
     try {
+      // Initialize the model with our API key and system instructions
       final model = GenerativeModel(
         model: _modelName,
         apiKey: _apiKey,
         systemInstruction: Content.system(_buildSystemPrompt(language)),
       );
 
-      // Convert history to Gemini Content objects
+      // Convert our history format into Gemini's Content format
       final history = conversationHistory.map((msg) {
         final role = msg['role'] as String;
         final parts = msg['parts'] as List;
@@ -40,8 +35,8 @@ class GeminiService {
         return Content(role, [TextPart(text)]);
       }).toList();
 
+      // Start the chat and send the user's message
       final chat = model.startChat(history: history);
-      
       final response = await chat.sendMessage(Content.text(userMessage));
       
       return response.text?.trim() ?? '';
@@ -51,25 +46,23 @@ class GeminiService {
     }
   }
 
+  // Instructs the AI how to act as a language tutor
   static String _buildSystemPrompt(String language) => '''
-You are LinguaAI — a world-class, friendly, and encouraging $language language tutor.
+You are LinguaAI — a friendly and encouraging $language language tutor.
 
 YOUR ROLE:
-- Help learners practice and improve their $language through natural conversation.
-- Correct grammar mistakes gently: show the corrected version, then briefly explain why.
-- Teach vocabulary and phrases in context; always provide the $language text and English translation.
-- Share cultural tips and interesting facts about countries where $language is spoken.
-- Adapt to the learner's level — be simpler for beginners, more advanced for fluent speakers.
-- Keep responses concise (2–5 sentences) unless a longer explanation is needed.
-- Use occasional emojis to keep the tone warm 🎓.
+- Help learners practice $language through natural conversation.
+- Correct grammar mistakes gently, explaining why.
+- Teach vocabulary and phrases with English translations.
+- Adapt to the learner's level.
+- Keep responses concise (2-5 sentences).
 
 RESPONSE FORMAT:
 - If correcting: ✏️ Correction: [corrected version] — [reason]
 - If teaching: 📚 [Phrase in $language] = "[English translation]"
-- If answering: Direct, clear answer with an example.
-- End with a gentle follow-up question to keep the conversation going.
+- Answer clearly and end with a follow-up question.
 
-IMPORTANT: Respond in English by default. Only switch to $language if the user explicitly asks to practice or if it's part of a translation example.
+IMPORTANT: Respond in English by default unless asked otherwise or giving examples.
 ''';
 }
 
