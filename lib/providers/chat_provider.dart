@@ -9,7 +9,7 @@ import '../models/language_data.dart';
 import '../services/firestore_service.dart';
 
 // ── UPDATED SERVICE IMPORT ───────────────────────────────────────────────────
-import '../services/groq_service.dart'; 
+import '../services/gemini_service.dart'; 
 // ─────────────────────────────────────────────────────────────────────────────
 
 /// Tracks the AI response lifecycle state.
@@ -34,7 +34,7 @@ class ChatProvider extends ChangeNotifier {
 
   // Conversation history sent to AI on each request
   // Note: We keep the Gemini-style 'parts' structure here; 
-  // GroqService handles the conversion internally.
+  // GeminiService handles the conversion to Content objects internally.
   final List<Map<String, dynamic>> _history = [];
   static const int _maxHistory = 20; // max message pairs kept
 
@@ -70,7 +70,7 @@ class ChatProvider extends ChangeNotifier {
         languageFlag: _selectedLanguage.flag,
       );
 
-      // 2. Fetch and display the AI greeting from Groq
+      // 2. Fetch and display the AI greeting from Gemini
       await _fetchAiGreeting();
 
       notifyListeners();
@@ -125,8 +125,8 @@ class ChatProvider extends ChangeNotifier {
       // ③ Add to local history for context
       _addToHistory('user', trimmed);
 
-      // ④ CALL GROQ SERVICE
-      final aiText = await GroqService.sendMessage(
+      // ④ CALL GEMINI SERVICE
+      final aiText = await GeminiService.sendMessage(
         language:            _selectedLanguage.name,
         conversationHistory: List.from(_history),
         userMessage:         trimmed,
@@ -189,8 +189,8 @@ class ChatProvider extends ChangeNotifier {
     notifyListeners();
 
     try {
-      // ── CALL GROQ SERVICE FOR GREETING ─────────────────────────────────────
-      final greeting = await GroqService.sendMessage(
+      // ── CALL GEMINI SERVICE FOR GREETING ─────────────────────────────────────
+      final greeting = await GeminiService.sendMessage(
         language:            _selectedLanguage.name,
         conversationHistory: [],
         userMessage:

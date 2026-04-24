@@ -19,7 +19,7 @@ dependencies:
   # ── State Management ────────────────────────────────────────────────────────
   provider: ^6.1.2
 
-  # ── Networking (Groq/Gemini API) ───────────────────────────────────────────
+  # ── Networking (Gemini API) ────────────────────────────────────────────────
   http: ^1.2.1
 
   # ── UI / Fonts ──────────────────────────────────────────────────────────────
@@ -31,6 +31,7 @@ dependencies:
   uuid: ^4.4.0
   shared_preferences: ^2.2.3
   google_generative_ai: ^0.4.7
+  flutter_dotenv: ^6.0.1
 
 dev_dependencies:
   flutter_test:
@@ -41,3 +42,4 @@ flutter:
   uses-material-design: true
   assets:
     - assets/images/
+    - .env
