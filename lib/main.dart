@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:provider/provider.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 import 'firebase_options.dart';
 import 'providers/chat_provider.dart';
@@ -20,6 +21,9 @@ Future<void> main() async {
     DeviceOrientation.portraitUp,
     DeviceOrientation.portraitDown,
   ]);
+
+  // Load environment variables
+  await dotenv.load(fileName: ".env");
 
   // Style the Android status bar to match our dark theme
   SystemChrome.setSystemUIOverlayStyle(
