@@ -313,7 +313,7 @@ class _ChatScreenState extends State<ChatScreen> {
           _infoTile('Messages',    '${p.messages.length}'),
           _infoTile('Session ID',
               p.activeChatId?.substring(0, 12) ?? 'N/A'),
-            _infoTile('AI Engine', 'Groq (Llama 3.3)'),
+            _infoTile('AI Engine', 'Gemini API'),
           const SizedBox(height: 16),
         ]),
       ),
