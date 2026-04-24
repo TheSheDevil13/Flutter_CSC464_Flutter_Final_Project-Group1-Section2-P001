@@ -7,8 +7,8 @@ class GeminiService {
   // Get the API key from the .env file
   static String get _apiKey => dotenv.env['GEMINI_API_KEY'] ?? '';
 
-  // Use the 2.5 flash model for fast responses
-  static const String _modelName = 'gemini-2.5-flash';
+  // Use the 2.5 flash lite model for reliable, fast responses
+  static const String _modelName = 'gemini-2.5-flash-lite';
 
   static Future<String> sendMessage({
     required String language,
