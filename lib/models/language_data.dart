@@ -28,7 +28,7 @@ const List<LanguageData> kAvailableLanguages = [
   LanguageData(name: 'Mandarin',   flag: '🇨🇳', nativeName: '普通话',      greeting: '你好',       colorHex: 'F7DC6F'),
   LanguageData(name: 'Arabic',     flag: '🇸🇦', nativeName: 'العربية',    greeting: 'مرحباً',      colorHex: '82E0AA'),
   LanguageData(name: 'Italian',    flag: '🇮🇹', nativeName: 'Italiano',   greeting: 'Ciao',      colorHex: 'F0B27A'),
-  LanguageData(name: 'Portuguese', flag: '🇧🇷', nativeName: 'Português',  greeting: 'Olá',       colorHex: '85C1E9'),
+  LanguageData(name: 'English',    flag: '🇬🇧', nativeName: 'English',    greeting: 'Hello',     colorHex: '85C1E9'),
   LanguageData(name: 'Hindi',      flag: '🇮🇳', nativeName: 'हिन्दी',    greeting: 'नमस्ते',   colorHex: 'D2B4DE'),
   LanguageData(name: 'Bengali',    flag: '🇧🇩', nativeName: 'বাংলা',      greeting: 'হ্যালো',   colorHex: '76D7C4'),
   LanguageData(name: 'Russian',    flag: '🇷🇺', nativeName: 'Русский',    greeting: 'Привет',   colorHex: 'F1948A'),
